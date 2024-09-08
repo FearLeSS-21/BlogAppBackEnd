@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/users")
-@CrossOrigin(origins = "http://localhost:4200")  // Allow requests from Angular development server
+@CrossOrigin(origins = "http://localhost:4200")
 public class UserController {
 
     @Autowired
@@ -18,9 +18,20 @@ public class UserController {
     public ResponseEntity<User> signup(@RequestBody User user) {
         User existingUser = userService.findByEmail(user.getEmail());
         if (existingUser != null) {
-            return ResponseEntity.status(409).body(null);  // Conflict status
+            return ResponseEntity.status(409).body(null);
         }
         User registeredUser = userService.registerUser(user);
         return ResponseEntity.ok(registeredUser);
     }
+
+    // New login endpoint
+    @PostMapping("/login")
+    public ResponseEntity<User> login(@RequestBody User user) {
+        User existingUser = userService.findByEmail(user.getEmail());
+        if (existingUser != null && existingUser.getPassword().equals(user.getPassword())) {
+            return ResponseEntity.ok(existingUser);
+        }
+        return ResponseEntity.status(401).body(null);
+    }
+
 }
