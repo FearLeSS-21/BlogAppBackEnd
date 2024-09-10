@@ -2,6 +2,7 @@ package org.example.controller;
 
 import org.example.model.User;
 import org.example.service.UserService;
+import org.example.validation.UserValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,23 +16,18 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/signup")
-    public ResponseEntity<User> signup(@RequestBody User user) {
+    public ResponseEntity<?> signup(@RequestBody User user) {
+        String validationError = UserValidator.validateUser(user);
+        if (validationError != null) {
+            return ResponseEntity.badRequest().body(validationError);
+        }
+
         User existingUser = userService.findByEmail(user.getEmail());
         if (existingUser != null) {
-            return ResponseEntity.status(409).body(null);
+            return ResponseEntity.status(409).body("Email already in use");
         }
+
         User registeredUser = userService.registerUser(user);
         return ResponseEntity.ok(registeredUser);
     }
-
-    // New login endpoint
-    @PostMapping("/login")
-    public ResponseEntity<User> login(@RequestBody User user) {
-        User existingUser = userService.findByEmail(user.getEmail());
-        if (existingUser != null && existingUser.getPassword().equals(user.getPassword())) {
-            return ResponseEntity.ok(existingUser);
-        }
-        return ResponseEntity.status(401).body(null);
-    }
-
 }
