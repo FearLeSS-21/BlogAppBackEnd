@@ -41,6 +41,6 @@ public class UserValidator {
             return "Password must contain at least one special character";
         }
 
-        return null; // Return null if there are no validation errors
+        return null;
     }
 }
