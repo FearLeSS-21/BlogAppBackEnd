@@ -30,4 +30,5 @@ public class UserController {
         User registeredUser = userService.registerUser(user);
         return ResponseEntity.ok(registeredUser);
     }
+
 }
