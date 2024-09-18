@@ -52,5 +52,4 @@ public class UserController {
         // Return success response as JSON
         return ResponseEntity.ok(Map.of("message", "Login successful"));
     }
-
 }
