@@ -22,6 +22,8 @@ public class SecurityConfig {
         http
                 .authorizeRequests()
                 .requestMatchers("/users/**").permitAll() // Allow access to /users endpoints
+                .requestMatchers("/posts").permitAll() // Allow access to /posts endpoints
+                .requestMatchers("/posts/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .csrf().disable(); // Disable CSRF for simplicity

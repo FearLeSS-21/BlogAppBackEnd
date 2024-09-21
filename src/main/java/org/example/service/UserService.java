@@ -17,7 +17,6 @@ public class UserService {
 
     // Registers a new user with an encrypted password
     public User registerUser(User user) {
-        // Encrypt the plain text password before saving to the database
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
@@ -27,11 +26,13 @@ public class UserService {
         return userRepository.findByEmail(email);
     }
 
+    // Find user by ID
+    public User findById(Long id) {
+        return userRepository.findById(id).orElse(null); // Ensure to return null if not found
+    }
+
     // Verifies if the raw password matches the encrypted one stored in the database
     public boolean checkPassword(User user, String rawPassword) {
-        // Compare raw password with the stored encrypted password
         return passwordEncoder.matches(rawPassword, user.getPassword());
     }
 }
-
-

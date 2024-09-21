@@ -1,12 +1,12 @@
 package org.example.service;
 
 import org.example.model.Post;
-import org.example.model.User;
 import org.example.repository.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PostService {
@@ -14,30 +14,32 @@ public class PostService {
     @Autowired
     private PostRepository postRepository;
 
-    public Post createPost(Post post, User user) {
-        post.setUser(user);
+    // Create a new post
+    public Post createPost(Post post) {
         return postRepository.save(post);
     }
 
-    public List<Post> getPostsByUser(User user) {
-        return postRepository.findByUserId(user.getId());
+    // Retrieve all posts with user details
+    public List<Post> getAllPosts() {
+        return postRepository.findAll(); // Fetch all posts
     }
 
-    public Post updatePost(Long postId, Post postDetails) {
-        Post post = postRepository.findById(postId)
+    // Retrieve a post by ID
+    public Optional<Post> getPostById(Long postId) {
+        return postRepository.findById(postId);
+    }
+
+    // Update an existing post
+    public Post updatePost(Long postId, Post updatedPost) {
+        Post existingPost = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
-
-        post.setTitle(postDetails.getTitle());
-        post.setContent(postDetails.getContent());
-
-        return postRepository.save(post);
+        existingPost.setTitle(updatedPost.getTitle());
+        existingPost.setContent(updatedPost.getContent());
+        return postRepository.save(existingPost);
     }
 
+    // Delete a post
     public void deletePost(Long postId) {
         postRepository.deleteById(postId);
-    }
-
-    public List<Post> getAllPosts() {
-        return postRepository.findAll();
     }
 }
