@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import org.example.repository.UserRepository;
 import org.example.model.User;
 
+import java.util.Optional;
+
 @Service
 public class UserService {
 
@@ -17,8 +19,8 @@ public class UserService {
     private PasswordEncoder passwordEncoder;
 
     public ResponseEntity<?> handleUserSignup(User user) {
-        User existingUser = findByEmail(user.getEmail());
-        if (existingUser != null) {
+        Optional<User> existingUser = findByEmail(user.getEmail());
+        if (existingUser.isPresent()) {
             return ResponseEntity.status(409).body("Email already in use");
         }
 
@@ -30,7 +32,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User findByEmail(String email) {
+    public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 }
