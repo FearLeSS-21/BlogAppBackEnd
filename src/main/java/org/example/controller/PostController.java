@@ -23,45 +23,67 @@ public class PostController {
     private UserService userService;
 
     @PostMapping
-    public ResponseEntity<Post> createPost(@RequestBody Post post) {
+    public ResponseEntity<?> createPost(@RequestBody Post post) {
         User user = userService.findById(post.getUser().getId());
         post.setUser(user);
 
         Post createdPost = postService.createPost(post);
-        return ResponseEntity.ok(createdPost);
+        return ResponseEntity.ok().body("Post created successfully: " + createdPost);
     }
 
     @GetMapping
-    public ResponseEntity<List<Post>> getAllPosts() {
+    public ResponseEntity<?> getAllPosts() {
         List<Post> posts = postService.getAllPosts();
         return ResponseEntity.ok(posts);
     }
 
     @GetMapping("/{postId}")
-    public ResponseEntity<Post> getPostById(@PathVariable Long postId) {
+    public ResponseEntity<?> getPostById(@PathVariable Long postId) {
         Optional<Post> post = postService.getPostById(postId);
-        return post.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        if (post.isPresent()) {
+            return ResponseEntity.ok(post.get());
+        } else {
+            return ResponseEntity.status(404).body("Post not found");
+        }
     }
 
+
     @PutMapping("/{postId}")
-    public ResponseEntity<Post> updatePost(@PathVariable Long postId, @RequestBody Post updatedPost) {
-        Post post = postService.getPostById(postId).orElseThrow();
+    public ResponseEntity<?> updatePost(@PathVariable Long postId, @RequestBody Post updatedPost) {
+        Post post = postService.getPostById(postId).orElse(null);
+        if (post == null) {
+            return ResponseEntity.status(404).body("Post not found");
+        }
+
         User user = userService.findById(updatedPost.getUser().getId());
 
         // Ensure the user is the author of the post
         if (!post.getUser().getId().equals(user.getId())) {
-            return ResponseEntity.status(403).body(null); // Forbidden
+            return ResponseEntity.status(403).body("Forbidden: You are not the author of this post");
         }
 
-        updatedPost.setUser(user); // Set the full user object
+        updatedPost.setUser(user);
         Post updated = postService.updatePost(postId, updatedPost);
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok().body("Post updated successfully: " + updated);
     }
 
     @DeleteMapping("/{postId}")
-    public ResponseEntity<Void> deletePost(@PathVariable Long postId) {
+    public ResponseEntity<?> deletePost(@PathVariable Long postId, @RequestParam Long userId) {
+        Optional<Post> postOptional = postService.getPostById(postId);
+
+        if (!postOptional.isPresent()) {
+            return ResponseEntity.status(404).body("Post not found");
+        }
+
+        Post post = postOptional.get();
+
+        // Check if the logged-in user's ID matches the post's author's ID
+        if (!post.getUser().getId().equals(userId)) {
+            return ResponseEntity.status(403).body("Forbidden: You are not the author of this post");
+        }
+
         postService.deletePost(postId);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().body("Post deleted successfully");
     }
+
 }

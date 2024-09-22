@@ -21,12 +21,9 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                .requestMatchers("/users/**").permitAll() // Allow access to /users endpoints
-                .requestMatchers("/posts").permitAll() // Allow access to /posts endpoints
-                .requestMatchers("/posts/**").permitAll()
-                .anyRequest().authenticated()
+                .anyRequest().permitAll() // Any other requests require authentication
                 .and()
-                .csrf().disable(); // Disable CSRF for simplicity
+                .csrf().disable();  // Disable CSRF for simplicity
         return http.build();
     }
 }
