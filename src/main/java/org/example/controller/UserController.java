@@ -17,12 +17,6 @@ public class UserController {
 
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@Valid @RequestBody User user) {
-        User existingUser = userService.findByEmail(user.getEmail());
-        if (existingUser != null) {
-            return ResponseEntity.status(409).body("Email already in use");
-        }
-
-        User registeredUser = userService.registerUser(user);
-        return ResponseEntity.ok(registeredUser);
+        return userService.handleUserSignup(user);
     }
 }
