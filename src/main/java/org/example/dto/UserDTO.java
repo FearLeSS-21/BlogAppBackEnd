@@ -8,6 +8,7 @@ import lombok.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class UserDTO {
 
     @NotBlank(message = "Email is mandatory")
