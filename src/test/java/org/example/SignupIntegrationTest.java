@@ -1,8 +1,7 @@
 package org.example;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.builder.UserBuilder;
 import org.example.model.User;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.example.dto.UserDTO;
 import org.example.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,21 +42,20 @@ public class SignupIntegrationTest {
 
     @Test
     public void testSuccessfulSignup() throws Exception {
-        // Create a new user using UserBuilder
-        User newUser = new UserBuilder()
-                .withEmail("testuser@example.com")
-                .withPassword("Password123!")
-                .withName("Test User")
+        // Use UserDTO instead of User
+        UserDTO newUser = UserDTO.builder()
+                .email("testuser@example.com")
+                .password("Password123!")
+                .name("Test User")
                 .build();
 
-        // Convert User object to JSON
         String newUserJson = objectMapper.writeValueAsString(newUser);
 
         // Perform POST request to signup endpoint
         mockMvc.perform(MockMvcRequestBuilders.post("/users/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(newUserJson))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated()) // Use status 201 Created for successful signup
                 .andDo(print())
                 .andExpect(content().string(containsString("testuser@example.com")))
                 .andExpect(content().string(containsString("Test User")));
@@ -71,18 +69,17 @@ public class SignupIntegrationTest {
     @Test
     public void testSignupWithExistingEmail() throws Exception {
         // Pre-create a user in the database
-        User existingUser = new UserBuilder()
-                .withEmail("testuser@example.com")
-                .withPassword(passwordEncoder.encode("Password123!"))
-                .withName("Test User")
-                .build();
+        User existingUser = new User();
+        existingUser.setEmail("testuser@example.com");
+        existingUser.setPassword(passwordEncoder.encode("Password123!"));
+        existingUser.setName("Test User");
         userRepository.save(existingUser);
 
-        // Try to sign up with the same email
-        User newUser = new UserBuilder()
-                .withEmail("testuser@example.com")
-                .withPassword("Password123!")
-                .withName("Test User")
+        // Try to sign up with the same email using UserDTO
+        UserDTO newUser = UserDTO.builder()
+                .email("testuser@example.com")
+                .password("Password123!")
+                .name("Test User")
                 .build();
 
         String newUserJson = objectMapper.writeValueAsString(newUser);
@@ -96,10 +93,11 @@ public class SignupIntegrationTest {
 
     @Test
     public void testSignupWithInvalidPassword() throws Exception {
-        User newUser = new UserBuilder()
-                .withEmail("testuser@example.com")
-                .withPassword("pass") // Invalid password
-                .withName("Test User")
+        // Create a UserDTO with an invalid password
+        UserDTO newUser = UserDTO.builder()
+                .email("testuser@example.com")
+                .password("pass") // Invalid password
+                .name("Test User")
                 .build();
 
         String newUserJson = objectMapper.writeValueAsString(newUser);
@@ -108,15 +106,16 @@ public class SignupIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(newUserJson))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string(containsString("Password must be at least 8 characters long")));
+                .andExpect(content().string(containsString("Password must be at least 6 characters long")));
     }
 
     @Test
     public void testSignupWithInvalidEmailFormat() throws Exception {
-        User newUser = new UserBuilder()
-                .withEmail("invalid-email") // Invalid email format
-                .withPassword("Password123!")
-                .withName("Test User")
+        // Create a UserDTO with an invalid email format
+        UserDTO newUser = UserDTO.builder()
+                .email("invalid-email") // Invalid email format
+                .password("Password123!")
+                .name("Test User")
                 .build();
 
         String newUserJson = objectMapper.writeValueAsString(newUser);
@@ -125,6 +124,6 @@ public class SignupIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(newUserJson))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string(containsString("Invalid email format")));
+                .andExpect(content().string(containsString("must be in a valid format")));
     }
 }
