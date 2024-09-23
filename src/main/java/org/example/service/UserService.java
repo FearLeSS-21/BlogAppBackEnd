@@ -1,11 +1,13 @@
 package org.example.service;
 
+import org.example.exception.UserAlreadyExistsException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.example.repository.UserRepository;
 import org.example.model.User;
+import org.example.dto.UserDTO;
+import org.example.viewmodel.UserViewModel;
 
 import java.util.Optional;
 
@@ -18,21 +20,21 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public ResponseEntity<?> handleUserSignup(User user) {
-        Optional<User> existingUser = findByEmail(user.getEmail());
+    public UserViewModel registerUser(UserDTO userDTO) {
+        Optional<User> existingUser = userRepository.findByEmail(userDTO.getEmail());
         if (existingUser.isPresent()) {
-            return ResponseEntity.status(409).body("Email already in use");
+            throw new UserAlreadyExistsException("Email already in use");
         }
 
-        return ResponseEntity.ok(registerUser(user));
-    }
+        User user = new User();
+        user.setEmail(userDTO.getEmail());
+        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        user.setName(userDTO.getName());
 
-    public User registerUser(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
-    }
-
-    public Optional<User> findByEmail(String email) {
-        return userRepository.findByEmail(email);
+        User savedUser = userRepository.save(user);
+        return UserViewModel.builder()
+                .email(savedUser.getEmail())
+                .name(savedUser.getName())
+                .build();
     }
 }
