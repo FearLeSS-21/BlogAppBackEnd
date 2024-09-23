@@ -2,7 +2,7 @@ package org.example.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.*;
 
 @Data
@@ -10,10 +10,8 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class UserDTO {
-
+    @Email(message = "Email must be in a valid format.")
     @NotBlank(message = "Email is mandatory")
-    @Pattern(regexp = "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
-            message = "Email must be in a valid format with exactly one '@' symbol and a valid domain.")
     private String email;
 
 
