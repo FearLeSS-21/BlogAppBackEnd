@@ -12,9 +12,10 @@ import lombok.*;
 public class UserDTO {
 
     @NotBlank(message = "Email is mandatory")
-    @Pattern(regexp = "^(?=.*example)([^@\\s]+)@([^@\\s]+\\.[^@\\s]+)$",
-            message = "Email must contain 'example' and have a valid format with exactly one '@' symbol.")
+    @Pattern(regexp = "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+            message = "Email must be in a valid format with exactly one '@' symbol and a valid domain.")
     private String email;
+
 
     @NotBlank(message = "Password is mandatory")
     @Size(min = 6, message = "Password should be at least 6 characters long")
