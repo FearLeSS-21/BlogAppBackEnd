@@ -18,5 +18,25 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 
-    // Handle other exceptions here
+    @ExceptionHandler(UserInvalidPasswordFormatException.class)
+    public ResponseEntity<ErrorDTO> handleInvalidPasswordFormat(UserInvalidPasswordFormatException ex) {
+        ErrorDTO error = ErrorDTO.builder()
+                .message(ex.getMessage())
+                .details("Password format is invalid. Please ensure it meets the required criteria.")
+
+                .build();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    @ExceptionHandler(UserInvalidEmailFormatException.class)
+    public ResponseEntity<ErrorDTO> handleInvalidEmailFormat(UserInvalidEmailFormatException ex) {
+        ErrorDTO error = ErrorDTO.builder()
+                .message(ex.getMessage())
+                .details("Email format is invalid. Please provide a valid email address.")
+                .build();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+
+
 }
