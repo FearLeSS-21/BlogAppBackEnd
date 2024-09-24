@@ -25,23 +25,32 @@ public class UserService {
     private ObjectMapper objectMapper;
 
     public UserViewModel registerUser(UserDTO userDTO) {
-
-
         Optional<User> existingUser = userRepository.findByEmail(userDTO.getEmail());
         if (existingUser.isPresent()) {
             throw new UserAlreadyExistsException("Email already in use");
         }
 
-        User user = objectMapper.convertValue(userDTO, User.class);
+        User user = mapToUser(userDTO); // Changed
         user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
 
         User savedUser = userRepository.save(user);
-        return UserViewModel.builder()
-                .email(savedUser.getEmail())
-                .name(savedUser.getName())
-                .build();
-
-
+        return mapToUserViewModel(savedUser); // Changed
     }
+
+    private User mapToUser(UserDTO userDTO) { // New method
+        try {
+            return objectMapper.convertValue(userDTO, User.class);
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Failed to convert UserDTO to User", e);
+        }
+    }
+
+    private UserViewModel mapToUserViewModel(User user) { // New method
+        return UserViewModel.builder()
+                .email(user.getEmail())
+                .name(user.getName())
+                .build();
+    }
+
 
 }

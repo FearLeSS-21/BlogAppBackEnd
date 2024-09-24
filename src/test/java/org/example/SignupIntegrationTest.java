@@ -5,7 +5,6 @@ import org.example.model.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.dto.UserDTO;
 import org.example.repository.UserRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -17,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
@@ -33,11 +33,6 @@ public class SignupIntegrationTest {
 
     @Autowired
     private ObjectMapper objectMapper;
-
-    @BeforeEach
-    public void setup() {
-        userRepository.deleteAll();
-    }
 
     private void testSignup(String email, String password, String name, int expectedStatus) throws Exception {
         UserDTO newUser = UserDTO.builder()
@@ -64,18 +59,22 @@ public class SignupIntegrationTest {
 
     @Test
     public void testSignupWithExistingEmail() throws Exception {
-        userRepository.save(User.builder()
+        // First, create a user to establish the existing email
+        User initialUser = User.builder()
                 .email("testuser@example.com")
                 .password(passwordEncoder.encode("Password123@"))
-                .name("Test User")
-                .build());
+                .name("Original User")
+                .build();
+        userRepository.save(initialUser);
 
-        testSignup("testuser@example.com", "Password123@", "Test User", 409);
+        // Attempt to sign up again with the same email but different name and password
+        testSignup("testuser@example.com", "NewPassword123@", "Another Test User", 409); // Expect conflict status
 
+        // Verify that the initial user still exists and is unchanged
         User foundUser = userRepository.findByEmail("testuser@example.com").orElse(null);
         assertThat(foundUser).isNotNull();
-        assertThat(foundUser.getName()).isEqualTo("Test User");
-        assertThat(passwordEncoder.matches("Password123@", foundUser.getPassword())).isTrue();
+        assertThat(foundUser.getName()).isEqualTo("Original User"); // Ensure name remains unchanged
+        assertThat(passwordEncoder.matches("Password123@", foundUser.getPassword())).isTrue(); // Ensure password remains unchanged
     }
 
     @Test
@@ -85,6 +84,6 @@ public class SignupIntegrationTest {
 
     @Test
     public void testSignupWithInvalidEmailFormat() throws Exception {
-        testSignup("invalid@email.com", "Password123!", "Test User", 400);
+        testSignup("invalidemail.com", "Password123!", "Test User", 400);
     }
 }
