@@ -1,6 +1,8 @@
 package org.example.service;
 
 import org.example.exception.UserAlreadyExistsException;
+import org.example.exception.UserInvalidEmailFormatException;
+import org.example.exception.UserInvalidPasswordFormatException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,8 @@ public class UserService {
     private PasswordEncoder passwordEncoder;
 
     public UserViewModel registerUser(UserDTO userDTO) {
+
+
         Optional<User> existingUser = userRepository.findByEmail(userDTO.getEmail());
         if (existingUser.isPresent()) {
             throw new UserAlreadyExistsException("Email already in use");
@@ -36,5 +40,8 @@ public class UserService {
                 .email(savedUser.getEmail())
                 .name(savedUser.getName())
                 .build();
+
+
     }
+
 }
