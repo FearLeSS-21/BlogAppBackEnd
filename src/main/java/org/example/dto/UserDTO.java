@@ -22,5 +22,6 @@ public class UserDTO {
     private String password;
 
     @NotBlank(message = "Name is mandatory")
+
     private String name;
 }
