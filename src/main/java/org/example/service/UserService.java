@@ -1,8 +1,7 @@
 package org.example.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.exception.UserAlreadyExistsException;
-import org.example.exception.UserInvalidEmailFormatException;
-import org.example.exception.UserInvalidPasswordFormatException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -22,6 +21,9 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     public UserViewModel registerUser(UserDTO userDTO) {
 
 
@@ -30,10 +32,8 @@ public class UserService {
             throw new UserAlreadyExistsException("Email already in use");
         }
 
-        User user = new User();
-        user.setEmail(userDTO.getEmail());
+        User user = objectMapper.convertValue(userDTO, User.class);
         user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
-        user.setName(userDTO.getName());
 
         User savedUser = userRepository.save(user);
         return UserViewModel.builder()

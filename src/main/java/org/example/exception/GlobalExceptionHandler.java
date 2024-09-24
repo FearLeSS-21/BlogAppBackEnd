@@ -8,7 +8,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestControllerAdvice
@@ -23,37 +25,22 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 
-    @ExceptionHandler(UserInvalidPasswordFormatException.class)
-    public ResponseEntity<ErrorDTO> handleInvalidPasswordFormat(UserInvalidPasswordFormatException ex) {
-        ErrorDTO error = ErrorDTO.builder()
-                .message(ex.getMessage())
-                .details("Password format is invalid. Please ensure it meets the required criteria.")
-                .build();
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
-    }
-
-    @ExceptionHandler(UserInvalidEmailFormatException.class)
-    public ResponseEntity<ErrorDTO> handleInvalidEmailFormat(UserInvalidEmailFormatException ex) {
-        ErrorDTO error = ErrorDTO.builder()
-                .message(ex.getMessage())
-                .details("Email format is invalid. Please provide a valid email address.")
-                .build();
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
-    }
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
+    public ResponseEntity<ErrorDTO> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        List<String> errorMessages = new ArrayList<>();
 
         ex.getBindingResult().getAllErrors().forEach(error -> {
-            String fieldName = ((FieldError) error).getField();
             String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
+            errorMessages.add(errorMessage);
         });
 
+        ErrorDTO errorDTO = ErrorDTO.builder()
+                .message("Validation failed")
+                .details(errorMessages.toString())
+                .build();
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDTO);
     }
-
 
 
 

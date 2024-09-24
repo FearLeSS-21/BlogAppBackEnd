@@ -1,5 +1,6 @@
 package org.example;
 
+import jakarta.transaction.Transactional;
 import org.example.model.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.dto.UserDTO;
@@ -16,9 +17,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-
 @SpringBootTest
 @AutoConfigureMockMvc
+@Transactional
 public class SignupIntegrationTest {
 
     @Autowired
@@ -37,7 +38,6 @@ public class SignupIntegrationTest {
     public void setup() {
         userRepository.deleteAll();
     }
-
 
     private void testSignup(String email, String password, String name, int expectedStatus) throws Exception {
         UserDTO newUser = UserDTO.builder()
@@ -64,8 +64,18 @@ public class SignupIntegrationTest {
 
     @Test
     public void testSignupWithExistingEmail() throws Exception {
-        userRepository.save(new User("testuser@example.com", passwordEncoder.encode("Password123!"), "Test User"));
-        testSignup("testuser@example.com", "Password123!", "Test User", 400);
+        userRepository.save(User.builder()
+                .email("testuser@example.com")
+                .password(passwordEncoder.encode("Password123@"))
+                .name("Test User")
+                .build());
+
+        testSignup("testuser@example.com", "Password123@", "Test User", 409);
+
+        User foundUser = userRepository.findByEmail("testuser@example.com").orElse(null);
+        assertThat(foundUser).isNotNull();
+        assertThat(foundUser.getName()).isEqualTo("Test User");
+        assertThat(passwordEncoder.matches("Password123@", foundUser.getPassword())).isTrue();
     }
 
     @Test
