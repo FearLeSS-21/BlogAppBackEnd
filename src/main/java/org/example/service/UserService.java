@@ -30,14 +30,14 @@ public class UserService {
             throw new UserAlreadyExistsException("Email already in use");
         }
 
-        User user = mapToUser(userDTO); // Changed
+        User user = objectMapper.convertValue(userDTO, User.class);
         user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
 
         User savedUser = userRepository.save(user);
-        return mapToUserViewModel(savedUser); // Changed
+        return mapToUserViewModel(savedUser);
     }
 
-    private User mapToUser(UserDTO userDTO) { // New method
+    private User mapToUser(UserDTO userDTO) {
         try {
             return objectMapper.convertValue(userDTO, User.class);
         } catch (IllegalArgumentException e) {
@@ -45,12 +45,13 @@ public class UserService {
         }
     }
 
-    private UserViewModel mapToUserViewModel(User user) { // New method
-        return UserViewModel.builder()
-                .email(user.getEmail())
-                .name(user.getName())
-                .build();
-    }
 
+    private UserViewModel mapToUserViewModel(User user) {
+        try {
+            return objectMapper.convertValue(user, UserViewModel.class);
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Failed to convert User to UserViewModel", e);
+        }
+    }
 
 }
