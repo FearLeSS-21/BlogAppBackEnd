@@ -1,6 +1,8 @@
 package org.example.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.validation.Valid;
+import org.example.dto.UserSignInDTO;
 import org.example.exception.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -37,7 +39,7 @@ public class UserService {
         return mapToUserViewModel(savedUser);
     }
 
-    public UserViewModel loginUser(UserDTO userDTO) {
+    public UserViewModel loginUser(@Valid UserSignInDTO userDTO) {
         User user = userRepository.findByEmail(userDTO.getEmail())
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 

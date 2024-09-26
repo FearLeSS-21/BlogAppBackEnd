@@ -1,6 +1,7 @@
 package org.example.controller;
 
 import org.example.dto.UserDTO;
+import org.example.dto.UserSignInDTO;
 import org.example.service.UserService;
 import org.example.viewmodel.UserViewModel;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +23,8 @@ public class UserController {
         return ResponseEntity.status(201).body(userViewModel);
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<UserViewModel> login(@Valid @RequestBody UserDTO userDTO) {
+    @PostMapping("/signin")
+    public ResponseEntity<UserViewModel> login(@Valid @RequestBody UserSignInDTO userDTO) {
         UserViewModel userViewModel = userService.loginUser(userDTO);
         return ResponseEntity.ok(userViewModel);
     }
