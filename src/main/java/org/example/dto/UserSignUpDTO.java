@@ -9,7 +9,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserDTO {
+public class UserSignUpDTO {
     @Email(message = "Email must be in a valid format.")
     @NotBlank(message = "Email is mandatory")
     private String email;

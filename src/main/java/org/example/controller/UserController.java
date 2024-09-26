@@ -1,6 +1,6 @@
 package org.example.controller;
 
-import org.example.dto.UserDTO;
+import org.example.dto.UserSignUpDTO;
 import org.example.dto.UserSignInDTO;
 import org.example.service.UserService;
 import org.example.viewmodel.UserViewModel;
@@ -18,8 +18,8 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/signup")
-    public ResponseEntity<UserViewModel> signup(@Valid @RequestBody UserDTO userDTO) {
-        UserViewModel userViewModel = userService.registerUser(userDTO);
+    public ResponseEntity<UserViewModel> signup(@Valid @RequestBody UserSignUpDTO userSignUpDTO) {
+        UserViewModel userViewModel = userService.registerUser(userSignUpDTO);
         return ResponseEntity.status(201).body(userViewModel);
     }
 

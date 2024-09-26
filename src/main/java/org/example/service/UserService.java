@@ -9,7 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.example.repository.UserRepository;
 import org.example.model.User;
-import org.example.dto.UserDTO;
+import org.example.dto.UserSignUpDTO;
 import org.example.viewmodel.UserViewModel;
 
 import java.util.Optional;
@@ -26,14 +26,14 @@ public class UserService {
     @Autowired
     private ObjectMapper objectMapper;
 
-    public UserViewModel registerUser(UserDTO userDTO) {
-        Optional<User> existingUser = userRepository.findByEmail(userDTO.getEmail());
+    public UserViewModel registerUser(UserSignUpDTO userSignUpDTO) {
+        Optional<User> existingUser = userRepository.findByEmail(userSignUpDTO.getEmail());
         if (existingUser.isPresent()) {
             throw new UserAlreadyExistsException("Email already in use");
         }
 
-        User user = objectMapper.convertValue(userDTO, User.class);
-        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        User user = objectMapper.convertValue(userSignUpDTO, User.class);
+        user.setPassword(passwordEncoder.encode(userSignUpDTO.getPassword()));
 
         User savedUser = userRepository.save(user);
         return mapToUserViewModel(savedUser);
