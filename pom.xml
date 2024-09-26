@@ -43,7 +43,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.15.0</version> <!-- Compatible with Spring Boot 3.3.2 -->
+            <version>2.15.0</version>
         </dependency>
 
         <!-- MySQL Connector -->
@@ -138,6 +138,14 @@
             <artifactId>jjwt</artifactId>
             <version>0.9.1</version>
         </dependency>
+
+        <!-- H2 DataBase -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>

@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.context.ActiveProfiles;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -19,6 +20,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
+@ActiveProfiles("test") // Specify the test profile to use H2
 public class SigninIntegrationTest {
 
     @Autowired
@@ -36,12 +38,18 @@ public class SigninIntegrationTest {
     private void testSignin(String email, String password, int expectedStatus) throws Exception {
         UserSignInDTO user = UserSignInDTO.builder().email(email).password(password).build();
 
-        mockMvc.perform(post("/users/signin").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(user))).andExpect(status().is(expectedStatus));
+        mockMvc.perform(post("/users/signin")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(user)))
+                .andExpect(status().is(expectedStatus));
     }
 
     @Test
     public void testSuccessfulLogin() throws Exception {
-        User user = User.builder().email("z@z.com").password(passwordEncoder.encode("Zwa@2182003")).build();
+        User user = User.builder()
+                .email("z@z.com")
+                .password(passwordEncoder.encode("Zwa@2182003"))
+                .build();
         userRepository.save(user);
 
         testSignin("z@z.com", "Zwa@2182003", 200);
@@ -54,8 +62,10 @@ public class SigninIntegrationTest {
 
     @Test
     public void testLoginWithIncorrectPassword() throws Exception {
-        // Setup: create a user
-        User user = User.builder().email("testuser@example.com").password(passwordEncoder.encode("Password123@")).build();
+        User user = User.builder()
+                .email("testuser@example.com")
+                .password(passwordEncoder.encode("Password123@"))
+                .build();
         userRepository.save(user);
 
         testSignin("testuser@example.com", "WrongPassword@", 400);
