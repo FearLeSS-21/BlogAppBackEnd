@@ -1,7 +1,7 @@
 package org.example.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.exception.UserAlreadyExistsException;
+import org.example.exception.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -37,7 +37,22 @@ public class UserService {
         return mapToUserViewModel(savedUser);
     }
 
+    public UserViewModel loginUser(UserDTO userDTO) {
+        User user = userRepository.findByEmail(userDTO.getEmail())
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        if (!passwordEncoder.matches(userDTO.getPassword(), user.getPassword())) {
+            throw new UserNotFoundException("Invalid password");
+        }
+
+        return mapToUserViewModel(user);
+    }
+
     private UserViewModel mapToUserViewModel(User user) {
+        if (user == null) {
+            throw new IllegalArgumentException("User cannot be null");
+        }
+
         try {
             return objectMapper.convertValue(user, UserViewModel.class);
         } catch (IllegalArgumentException e) {

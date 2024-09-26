@@ -21,4 +21,10 @@ public class UserController {
         UserViewModel userViewModel = userService.registerUser(userDTO);
         return ResponseEntity.status(201).body(userViewModel);
     }
+
+    @PostMapping("/login")
+    public ResponseEntity<UserViewModel> login(@Valid @RequestBody UserDTO userDTO) {
+        UserViewModel userViewModel = userService.loginUser(userDTO);
+        return ResponseEntity.ok(userViewModel);
+    }
 }
