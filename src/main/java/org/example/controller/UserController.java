@@ -1,6 +1,7 @@
 package org.example.controller;
 
 import jakarta.validation.Valid;
+import org.example.dto.LoginResponseDTO;
 import org.example.dto.UserSignInDTO;
 import org.example.dto.UserSignUpDTO;
 import org.example.service.UserService;
@@ -24,8 +25,10 @@ public class UserController {
     }
 
     @PostMapping("/signin")
-    public ResponseEntity<String> login(@Valid @RequestBody UserSignInDTO userDTO) {
-        String jwtToken = String.valueOf(userService.loginUser(userDTO));
-        return ResponseEntity.ok(jwtToken);
+    public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody UserSignInDTO userDTO) {
+        String jwtToken = userService.loginUser(userDTO);  // Assuming loginUser returns a string token
+        LoginResponseDTO response = new LoginResponseDTO(jwtToken, "Login successful");
+        return ResponseEntity.ok(response);
     }
+
 }

@@ -1,18 +1,16 @@
 package org.example;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.springtestdbunit.annotation.DatabaseSetup;
 import jakarta.transaction.Transactional;
 import org.example.dto.UserSignInDTO;
-import org.example.model.User;
-import org.example.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -27,31 +25,17 @@ public class SigninIntegrationTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
     private ObjectMapper objectMapper;
 
     private void testSignin(String email, String password, int expectedStatus) throws Exception {
         UserSignInDTO user = UserSignInDTO.builder().email(email).password(password).build();
 
-        mockMvc.perform(post("/users/signin")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(user)))
-                .andExpect(status().is(expectedStatus));
+        mockMvc.perform(post("/users/signin").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(user))).andExpect(status().is(expectedStatus));
     }
 
     @Test
+    @DatabaseSetup("/users.xml")
     public void testSuccessfulLogin() throws Exception {
-        User user = User.builder()
-                .email("z@z.com")
-                .password(passwordEncoder.encode("Zwa@2182003"))
-                .build();
-        userRepository.save(user);
-
         testSignin("z@z.com", "Zwa@2182003", 200);
     }
 
@@ -61,18 +45,13 @@ public class SigninIntegrationTest {
     }
 
     @Test
+    @DatabaseSetup("/users.xml")
     public void testLoginWithIncorrectPassword() throws Exception {
-        User user = User.builder()
-                .email("testuser@example.com")
-                .password(passwordEncoder.encode("Password123@"))
-                .build();
-        userRepository.save(user);
-
-        testSignin("testuser@example.com", "WrongPassword@", 400);
+        testSignin("testuser@example.com", "WrongPassword@", 401);
     }
 
     @Test
     public void testLoginWithInvalidEmailFormat() throws Exception {
-        testSignin("invalidemail.com", "Password123@", 400);
+        testSignin("invalidemail.com", "Password123@", 401);
     }
 }

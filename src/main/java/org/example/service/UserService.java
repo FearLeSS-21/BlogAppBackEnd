@@ -1,7 +1,6 @@
 package org.example.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.validation.Valid;
 import org.example.dto.UserSignInDTO;
 import org.example.dto.UserSignUpDTO;
 import org.example.exception.UserAlreadyExistsException;
@@ -44,11 +43,10 @@ public class UserService {
         return mapToUserViewModel(savedUser);
     }
 
-    public String loginUser(@Valid UserSignInDTO userDTO) {
-        // Validate user
+    public String loginUser(UserSignInDTO userDTO) {
+
         User user = userRepository.findByEmail(userDTO.getEmail()).orElseThrow(() -> new UserNotFoundException("User not found"));
 
-        // Check password
         if (!passwordEncoder.matches(userDTO.getPassword(), user.getPassword())) {
             throw new UserNotFoundException("Invalid password");
         }
@@ -56,6 +54,7 @@ public class UserService {
         // Generate and return JWT token
         return jwtUtil.generateToken(user.getEmail());
     }
+
 
     private UserViewModel mapToUserViewModel(User user) {
         return objectMapper.convertValue(user, UserViewModel.class);
