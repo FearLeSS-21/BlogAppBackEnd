@@ -37,15 +37,6 @@ public class UserService {
         return mapToUserViewModel(savedUser);
     }
 
-    private User mapToUser(UserDTO userDTO) {
-        try {
-            return objectMapper.convertValue(userDTO, User.class);
-        } catch (IllegalArgumentException e) {
-            throw new RuntimeException("Failed to convert UserDTO to User", e);
-        }
-    }
-
-
     private UserViewModel mapToUserViewModel(User user) {
         try {
             return objectMapper.convertValue(user, UserViewModel.class);
