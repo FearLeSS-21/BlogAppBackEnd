@@ -24,8 +24,8 @@ public class UserController {
     }
 
     @PostMapping("/signin")
-    public ResponseEntity<UserViewModel> login(@Valid @RequestBody UserSignInDTO userDTO) {
-        UserViewModel userViewModel = userService.loginUser(userDTO);
-        return ResponseEntity.ok(userViewModel);
+    public ResponseEntity<String> login(@Valid @RequestBody UserSignInDTO userDTO) {
+        String jwtToken = String.valueOf(userService.loginUser(userDTO));
+        return ResponseEntity.ok(jwtToken);
     }
 }
