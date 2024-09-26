@@ -1,13 +1,13 @@
 package org.example.controller;
 
-import org.example.dto.UserSignUpDTO;
+import jakarta.validation.Valid;
 import org.example.dto.UserSignInDTO;
+import org.example.dto.UserSignUpDTO;
 import org.example.service.UserService;
 import org.example.viewmodel.UserViewModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/users")

@@ -2,8 +2,8 @@ package org.example;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
+import org.example.dto.UserSignInDTO;
 import org.example.model.User;
-import org.example.dto.UserSignInDTO;  // Updated to import UserSignInDTO
 import org.example.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +13,8 @@ import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -36,10 +36,7 @@ public class SigninIntegrationTest {
     private void testSignin(String email, String password, int expectedStatus) throws Exception {
         UserSignInDTO user = UserSignInDTO.builder().email(email).password(password).build();
 
-        mockMvc.perform(post("/users/signin")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(user)))
-                .andExpect(status().is(expectedStatus));
+        mockMvc.perform(post("/users/signin").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(user))).andExpect(status().is(expectedStatus));
     }
 
     @Test
@@ -47,7 +44,7 @@ public class SigninIntegrationTest {
         User user = User.builder().email("z@z.com").password(passwordEncoder.encode("Zwa@2182003")).build();
         userRepository.save(user);
 
-        testSignin("z@z.com", "Zwa@2182003", 200);  // Changed expected status to 200 for successful login
+        testSignin("z@z.com", "Zwa@2182003", 200);
     }
 
     @Test
