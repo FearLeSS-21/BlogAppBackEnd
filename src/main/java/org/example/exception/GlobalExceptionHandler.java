@@ -18,12 +18,16 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UserAlreadyExistsException.class)
     public ResponseEntity<ErrorDTO> handleUserAlreadyExistsException(UserAlreadyExistsException ex) {
-        ErrorDTO error = ErrorDTO.builder()
-                .message(ex.getMessage())
-                .details("Please use another email address.")
-                .build();
+        ErrorDTO error = ErrorDTO.builder().message(ex.getMessage()).details("Please use another email address.").build();
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ErrorDTO> handleUserNotFoundException(UserNotFoundException ex) {
+        ErrorDTO error = ErrorDTO.builder().message(ex.getMessage()).details("Invalid login credentials.").build();
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorDTO> handleValidationExceptions(MethodArgumentNotValidException ex) {
         List<String> errorMessages = new ArrayList<>();
@@ -33,14 +37,10 @@ public class GlobalExceptionHandler {
             errorMessages.add(errorMessage);
         });
 
-        ErrorDTO errorDTO = ErrorDTO.builder()
-                .message("Validation failed")
-                .details(errorMessages.toString())
-                .build();
+        ErrorDTO errorDTO = ErrorDTO.builder().message("Validation failed").details(errorMessages.toString()).build();
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDTO);
     }
-
 
 
 }
