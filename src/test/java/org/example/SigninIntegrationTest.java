@@ -28,28 +28,39 @@ public class SigninIntegrationTest {
     private ObjectMapper objectMapper;
 
     private void testSignin(String email, String password, int expectedStatus) throws Exception {
-        UserSignInDTO user = UserSignInDTO.builder().email(email).password(password).build();
+        UserSignInDTO user = UserSignInDTO.builder()
+                .email(email)
+                .password(password)
+                .build();
 
-        mockMvc.perform(post("/users/signin").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(user))).andExpect(status().is(expectedStatus));
+        mockMvc.perform(post("/users/signin")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(user)))
+                .andExpect(status().is(expectedStatus));
     }
 
+    // Load the database with predefined users for successful login test
     @Test
     @DatabaseSetup("/users.xml")
     public void testSuccessfulLogin() throws Exception {
         testSignin("z@z.com", "Zwa@2182003", 200);
     }
 
+    // Load the database even for tests involving non-existing emails to ensure consistent setup
     @Test
+    @DatabaseSetup("/users.xml")
     public void testLoginWithNonExistingEmail() throws Exception {
         testSignin("nonexistent@example.com", "Password123@", 401);
     }
 
+    // Load the database for incorrect password scenario
     @Test
     @DatabaseSetup("/users.xml")
     public void testLoginWithIncorrectPassword() throws Exception {
         testSignin("testuser@example.com", "WrongPassword@", 401);
     }
 
+    // No need for database setup for invalid email format test
     @Test
     public void testLoginWithInvalidEmailFormat() throws Exception {
         testSignin("invalidemail.com", "Password123@", 401);

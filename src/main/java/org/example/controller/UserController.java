@@ -9,7 +9,6 @@ import org.example.viewmodel.UserViewModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 @RestController
 @RequestMapping("/users")
 @CrossOrigin(origins = "http://localhost:4200")
@@ -26,9 +25,8 @@ public class UserController {
 
     @PostMapping("/signin")
     public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody UserSignInDTO userDTO) {
-        String jwtToken = userService.loginUser(userDTO);  // Assuming loginUser returns a string token
+        String jwtToken = userService.loginUser(userDTO);
         LoginResponseDTO response = new LoginResponseDTO(jwtToken, "Login successful");
         return ResponseEntity.ok(response);
     }
-
 }

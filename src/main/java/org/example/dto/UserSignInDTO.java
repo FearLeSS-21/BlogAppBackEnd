@@ -15,7 +15,10 @@ import lombok.NoArgsConstructor;
 @Builder
 public class UserSignInDTO {
 
+    @NotBlank(message = "Email is mandatory")
     private String email;
+
+    @NotBlank(message = "Password is mandatory")
     private String password;
 
 }
