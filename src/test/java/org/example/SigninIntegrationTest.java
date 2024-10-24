@@ -41,12 +41,12 @@ public class SigninIntegrationTest {
 
     // Load the database with predefined users for successful login test
     @Test
-    @DatabaseSetup("/users.xml")
+    @DatabaseSetup("/users.xml") // Ensure this file is set up correctly for H2
     public void testSuccessfulLogin() throws Exception {
         testSignin("z@z.com", "Zwa@2182003", 200);
     }
 
-    // Load the database even for tests involving non-existing emails to ensure consistent setup
+    // Load the database for tests involving non-existing emails to ensure consistent setup
     @Test
     @DatabaseSetup("/users.xml")
     public void testLoginWithNonExistingEmail() throws Exception {

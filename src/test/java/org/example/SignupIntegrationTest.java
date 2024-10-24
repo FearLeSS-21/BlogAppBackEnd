@@ -37,9 +37,16 @@ public class SignupIntegrationTest {
     private ObjectMapper objectMapper;
 
     private void testSignup(String email, String password, String name, int expectedStatus) throws Exception {
-        UserSignUpDTO newUser = UserSignUpDTO.builder().email(email).password(password).name(name).build();
+        UserSignUpDTO newUser = UserSignUpDTO.builder()
+                .email(email)
+                .password(password)
+                .name(name)
+                .build();
 
-        mockMvc.perform(post("/users/signup").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(newUser))).andExpect(status().is(expectedStatus));
+        mockMvc.perform(post("/users/signup")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(newUser)))
+                .andExpect(status().is(expectedStatus));
     }
 
     @Test
@@ -54,7 +61,11 @@ public class SignupIntegrationTest {
 
     @Test
     public void testSignupWithExistingEmail() throws Exception {
-        User initialUser = User.builder().email("testuser@example.com").password(passwordEncoder.encode("Password123@")).name("Original User").build();
+        User initialUser = User.builder()
+                .email("testuser@example.com")
+                .password(passwordEncoder.encode("Password123@"))
+                .name("Original User")
+                .build();
         userRepository.save(initialUser);
 
         testSignup("testuser@example.com", "NewPassword123@", "Another Test User", 409);
