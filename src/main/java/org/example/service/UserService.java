@@ -10,6 +10,8 @@ import org.example.repository.UserRepository;
 import org.example.util.JwtUtil;
 import org.example.viewmodel.UserViewModel;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -30,6 +32,9 @@ public class UserService {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
     public UserViewModel registerUser(UserSignUpDTO userSignUpDTO) {
         userRepository.findByEmail(userSignUpDTO.getEmail()).ifPresent(user -> {
             throw new UserAlreadyExistsException("Email already in use");
@@ -37,22 +42,32 @@ public class UserService {
 
         User user = objectMapper.convertValue(userSignUpDTO, User.class);
         user.setPassword(passwordEncoder.encode(userSignUpDTO.getPassword()));
-
         User savedUser = userRepository.save(user);
+
         return mapToUserViewModel(savedUser);
     }
 
     public String loginUser(UserSignInDTO userDTO) {
-        User user = userRepository.findByEmail(userDTO.getEmail()).orElseThrow(() -> new UserNotFoundException("User not found"));
+        try {
 
-        if (!passwordEncoder.matches(userDTO.getPassword(), user.getPassword())) {
-            throw new UserNotFoundException("Invalid password");
+            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userDTO.getEmail(), userDTO.getPassword()));
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            // Return JWT token after successful authentication
+            return jwtUtil.generateToken(userDTO.getEmail());
+
+        } catch (Exception e) {
+
+            throw new UserNotFoundException("Invalid email or password");
         }
-
-        return jwtUtil.generateToken(user.getEmail());
     }
 
     private UserViewModel mapToUserViewModel(User user) {
-        return objectMapper.convertValue(user, UserViewModel.class);
+        try {
+            return objectMapper.convertValue(user, UserViewModel.class);
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Failed to convert User to UserViewModel", e);
+        }
     }
 }
