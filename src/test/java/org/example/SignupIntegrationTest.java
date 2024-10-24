@@ -1,9 +1,9 @@
 package org.example;
 
-import jakarta.transaction.Transactional;
-import org.example.model.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.dto.UserDTO;
+import jakarta.transaction.Transactional;
+import org.example.dto.UserSignUpDTO;
+import org.example.model.User;
 import org.example.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,15 +11,17 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
+@ActiveProfiles("test") // Specify the test profile to use H2
 public class SignupIntegrationTest {
 
     @Autowired
@@ -35,7 +37,7 @@ public class SignupIntegrationTest {
     private ObjectMapper objectMapper;
 
     private void testSignup(String email, String password, String name, int expectedStatus) throws Exception {
-        UserDTO newUser = UserDTO.builder()
+        UserSignUpDTO newUser = UserSignUpDTO.builder()
                 .email(email)
                 .password(password)
                 .name(name)
@@ -59,7 +61,6 @@ public class SignupIntegrationTest {
 
     @Test
     public void testSignupWithExistingEmail() throws Exception {
-        // First, create a user to establish the existing email
         User initialUser = User.builder()
                 .email("testuser@example.com")
                 .password(passwordEncoder.encode("Password123@"))
@@ -67,14 +68,12 @@ public class SignupIntegrationTest {
                 .build();
         userRepository.save(initialUser);
 
-        // Attempt to sign up again with the same email but different name and password
-        testSignup("testuser@example.com", "NewPassword123@", "Another Test User", 409); // Expect conflict status
+        testSignup("testuser@example.com", "NewPassword123@", "Another Test User", 409);
 
-        // Verify that the initial user still exists and is unchanged
         User foundUser = userRepository.findByEmail("testuser@example.com").orElse(null);
         assertThat(foundUser).isNotNull();
-        assertThat(foundUser.getName()).isEqualTo("Original User"); // Ensure name remains unchanged
-        assertThat(passwordEncoder.matches("Password123@", foundUser.getPassword())).isTrue(); // Ensure password remains unchanged
+        assertThat(foundUser.getName()).isEqualTo("Original User");
+        assertThat(passwordEncoder.matches("Password123@", foundUser.getPassword())).isTrue();
     }
 
     @Test
